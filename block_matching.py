@@ -18,9 +18,6 @@
 
 import numpy as np 
 import matplotlib.pyplot as plt
-import math
-import pywt
-import re
 
 N1, N2 = 10, 32
 
@@ -80,22 +77,22 @@ def block_matching(img):
 
     return patches, look_up_table
 
-img = plt.imread('FFDNET IPOL\input.png')
+# img = plt.imread('FFDNET_IPOL\input.png')
 
-patches, look_up_table = block_matching(img)
+# patches, look_up_table = block_matching(img)
 
-plt.figure(figsize=(12,6))
+# plt.figure(figsize=(12,6))
 
-plt.subplot(1, 2, 1)
-plt.imshow(img)
-plt.axis('off')
-plt.title('Original')
+# plt.subplot(1, 2, 1)
+# plt.imshow(img)
+# plt.axis('off')
+# plt.title('Original')
 
-plt.subplot(1, 2, 2)
-plt.imshow(patches[0])
-plt.axis('off')
-plt.title('Patch of size N1xN1 (top left of original)')
+# plt.subplot(1, 2, 2)
+# plt.imshow(patches[0])
+# plt.axis('off')
+# plt.title('Patch of size N1xN1 (top left of original)')
 
-plt.show()
+# plt.show()
 
-print(look_up_table['patch 0'])
+# print(look_up_table['patch 0'])
