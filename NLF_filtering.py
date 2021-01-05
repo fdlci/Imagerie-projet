@@ -158,13 +158,14 @@ def NLF(noisy_img, N1, tau, N2, patches, look_up_table, inv):
 
     return image_est
 
-N1, tau, N2 = 10, 7.5, 32
-
-noisy_img = plt.imread('FFDNET_IPOL/noisy.png')
-patches, look_up_table = block_matching(noisy_img)
-inv = inverse_look_up_table(patches, look_up_table)
-
-img_est = NLF(noisy_img, N1, tau, N2, patches, look_up_table, inv)
-print(img_est)
-plt.imshow(img_est)
-plt.show()
+if __name__ == '__main__':
+    N1, tau, N2 = 10, 7.5, 32
+    
+    noisy_img = plt.imread('FFDNET_IPOL/noisy.png')
+    patches, look_up_table = block_matching(noisy_img)
+    inv = inverse_look_up_table(patches, look_up_table)
+    
+    img_est = NLF(noisy_img, N1, tau, N2, patches, look_up_table, inv)
+    print(img_est)
+    plt.imshow(img_est)
+    plt.show()

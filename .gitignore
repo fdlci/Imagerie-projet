@@ -6,3 +6,9 @@ models/__pycache__/
 utilities/__pycache__/
 
 FFDNET_IPOL/__pycache__/
+
+.idea/
+
+.spyproject/
+
+__pycache__/
