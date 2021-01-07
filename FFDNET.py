@@ -8,6 +8,8 @@ from torch.autograd import Variable
 
 from utilities.utils import PSNR
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(device)
 
 def gaussian_noise_image(img, sigma):
     """Create a noisy image from a clean image."""
@@ -16,7 +18,7 @@ def gaussian_noise_image(img, sigma):
 
 
 def prepare_image(img, add_noise=True, noise_sigma=20):
-    dtype = torch.cuda.FloatTensor
+    dtype = torch.FloatTensor
     noise_sigma /= 255
     imorig = img.transpose(2, 0, 1)
     sh_im = imorig.shape
@@ -75,14 +77,14 @@ def variable_to_image(varim):
 
 def load_model(saved_model):
     Denoiser = FFDNet(num_input_channels=3)
-    state_dict = torch.load(saved_model)
-    Denoiser = nn.DataParallel(Denoiser, device_ids=[0]).cuda()
+    state_dict = torch.load(saved_model, map_location = device)
+    Denoiser = nn.DataParallel(Denoiser, device_ids=[0]).to(device)
     Denoiser.load_state_dict(state_dict)
     Denoiser.eval()
     return Denoiser
 
 
-saved_model = "FFDNET_IPOL/models/net_rgb.pth"
+# saved_model = "FFDNET_IPOL/models/net_rgb.pth"
 
 
 def FFDNET(img, saved_model, sigma, add_noise=False):
