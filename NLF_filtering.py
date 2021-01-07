@@ -128,7 +128,7 @@ def image_estimate(new_patches, img, N1):
                 new_image[i*N1:n, j*N1:p] = new_patches[cpt][N1-(n-i*N1):,N1-(p-j*N1):]
             cpt += 1
     return new_image
-
+    
 def denoising_image(img, N1, tau, patches, look_up_table, inv, N2):
 
     # inverse look-up table

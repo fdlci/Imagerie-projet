@@ -52,3 +52,4 @@ if __name__ == '__main__':
 
     plt.imshow(denoised_image)
     plt.show()
+    plt.savefig('NN3D_filter1D_75.png')
