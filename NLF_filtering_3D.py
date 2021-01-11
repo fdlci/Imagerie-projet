@@ -44,13 +44,18 @@ def weight_j(patch_ind, look_up_table, patches, tau, N1, N2):
     gkj_tilde = building_gkj_array(patch_ind, look_up_table, patches, N1, N2)
     n, p = gkj_tilde.shape[0], gkj_tilde.shape[1]
     summing = 0
+    wkj = []
     for i in range(n):
         for j in range(p):
-            coeffs = pywt.wavedec2(gkj_tilde[i,j,:], 'haar', level=2)
-            for i in range(len(coeffs)):
-                summing = np.linalg.norm(coeffs[i])**2
-    wkj = summing/(summing+tau**2)
-    return wkj**(-2)
+            coeffs0 = pywt.wavedec(gkj_tilde[i,j,:,0], 'haar', level=2)
+            coeffs1 = pywt.wavedec(gkj_tilde[i,j,:,1], 'haar', level=2)
+            coeffs2 = pywt.wavedec(gkj_tilde[i,j,:,2], 'haar', level=2)
+            for i in range(len(coeffs0)):
+                summing0 = np.linalg.norm(coeffs0[i])**2
+                summing1 = np.linalg.norm(coeffs1[i])**2
+                summing2 = np.linalg.norm(coeffs2[i])**2
+    wkj += [(summing0/(summing0+tau**2))**(-2)] + [(summing1/(summing1+tau**2))**(-2)] + [(summing2/(summing2+tau**2))**(-2)]
+    return wkj
 
 def all_weights(look_up_table, patches, tau, N1, N2):
     """Computes all weights"""
@@ -82,12 +87,12 @@ def new_patches(look_up_table, inv, patches, tau, N1, N2):
     new_patches = []
     for patch in inv:
         summing = np.zeros((N1,N1,3))
-        normalization = 0
+        normalization = np.zeros((1,3))
         for pat in inv[patch]:
             (ind_patch, position) = pat
             new_patch = all_transforms[ind_patch,:,:,position]
             summing += weights[ind_patch]*new_patch
-            normalization += weights[ind_patch]
+            normalization += np.array([weights[ind_patch][0], weights[ind_patch][1], weights[ind_patch][2]])
         new_patches.append(summing / normalization)
     return np.array(new_patches)
 
@@ -108,7 +113,7 @@ def image_estimate(new_patches, img, N1):
             elif i == n_10 and j == p_10:
                 new_image[i*N1:n, j*N1:p] = new_patches[cpt][N1-(n-i*N1):,N1-(p-j*N1):]
             cpt += 1
-    return new_image
+    return np.clip(new_image, 0, 1)
 
 def NLF_3D(img, N1, tau, patches, look_up_table, inv, N2):
 
@@ -131,9 +136,8 @@ if __name__ == '__main__':
     inv = inverse_look_up_table(patches, look_up_table)
     
     img_est = NLF_3D(noisy_img, N1, tau, patches, look_up_table, inv, N2)
-    print(img_est[0,0])
     plt.imshow(img_est)
     plt.show()
-
+    print(img_est)
     plt.imshow(abs(img_est-noisy_img))
     plt.show()
