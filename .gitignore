@@ -12,3 +12,4 @@ FFDNET_IPOL/__pycache__/
 .spyproject/
 
 __pycache__/
+DRUNET_DPIR/drunet_color.pth
