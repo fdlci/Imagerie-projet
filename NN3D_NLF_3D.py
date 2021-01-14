@@ -3,7 +3,7 @@ from tqdm import tqdm
 
 from FFDNET import gaussian_noise_image, FFDNET
 from block_matching import block_matching
-from NLF_filtering import inverse_look_up_table, NLF
+from NLF_filtering_3D import inverse_look_up_table, NLF_3D
 from utilities.utils import PSNR
 
 
@@ -27,7 +27,7 @@ def NN3D(img, sigma, K, saved_model, N1, N2):
             # inverse look-up table
             inv = inverse_look_up_table(patches, look_up_table)
             # NLF
-            y_hat = NLF(y_tilde, N1, tau_k, N2, patches, look_up_table, inv)
+            y_hat = NLF_3D(y_tilde, N1, tau_k, patches, look_up_table, inv, N2)
         else:
             lambd = 1 / k
             # Convex Combination
@@ -35,7 +35,7 @@ def NN3D(img, sigma, K, saved_model, N1, N2):
             # FFDNET
             y_tilde = FFDNET(z_hat, saved_model, lambd * sigma, add_noise=False)
             # NLF
-            y_hat = NLF(y_tilde, N1, tau_k, N2, patches, look_up_table, inv)
+            y_hat = NLF_3D(y_tilde, N1, tau_k, patches, look_up_table, inv, N2)
         y_previous = y_hat
     return y_hat
 
@@ -44,12 +44,12 @@ if __name__ == '__main__':
     img_path = 'FFDNET_IPOL/input.png'
     img = plt.imread(img_path)
     saved_model = "FFDNET_IPOL/models/net_rgb.pth"
-    sigma, K, N1, N2 = 30, 2, 10, 32
+    sigma, K, N1, N2 = 50, 2, 10, 32
     denoised_image = NN3D(img, sigma, K, saved_model, N1, N2)
 
     psnr = PSNR(img, denoised_image/255, peak=1)
     print(psnr)
 
     plt.imshow(denoised_image)
-    plt.savefig('NN3D_filter1D_75.png')
+    plt.savefig('NN3D_filter3D_30.png')
     plt.show()

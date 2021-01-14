@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pywt
 import re
+import cv2
 from block_matching import block_matching
 
 def Gamma(q, tau):
@@ -113,12 +114,12 @@ def image_estimate(new_patches, img, N1):
             elif i == n_10 and j == p_10:
                 new_image[i*N1:n, j*N1:p] = new_patches[cpt][N1-(n-i*N1):,N1-(p-j*N1):]
             cpt += 1
-    return np.clip(new_image, 0, 1)
+    return np.clip(new_image, 0, 255).astype(np.uint8)
 
 def NLF_3D(img, N1, tau, patches, look_up_table, inv, N2):
 
     # inverse look-up table
-    inv = inverse_look_up_table(patches, look_up_table)
+    # inv = inverse_look_up_table(patches, look_up_table)
 
     # New patches
     new_patch = new_patches(look_up_table, inv, patches, tau, N1, N2)
@@ -132,6 +133,8 @@ if __name__ == '__main__':
     N1, tau, N2 = 10, 7.5, 32
     
     noisy_img = plt.imread('FFDNET_IPOL/noisy.png')
+    noisy_img = cv2.normalize(noisy_img, None, alpha = 0, beta = 255, norm_type = cv2.NORM_MINMAX, dtype = cv2.CV_32F)
+    noisy_img = noisy_img.astype(np.uint8)
     patches, look_up_table = block_matching(noisy_img)
     inv = inverse_look_up_table(patches, look_up_table)
     

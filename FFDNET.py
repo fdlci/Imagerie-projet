@@ -18,7 +18,7 @@ def gaussian_noise_image(img, sigma):
 
 
 def prepare_image(img, add_noise=True, noise_sigma=20):
-    dtype = torch.FloatTensor
+    dtype = torch.cuda.FloatTensor
     noise_sigma /= 255
     imorig = img.transpose(2, 0, 1)
     sh_im = imorig.shape
