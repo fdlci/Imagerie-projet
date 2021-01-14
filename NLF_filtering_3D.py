@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pywt
 import re
 import cv2
+from utilities.utils import PSNR
 from block_matching import block_matching
 
 def Gamma(q, tau):
@@ -40,23 +41,36 @@ def transform_over_all_img(look_up_table,patches,tau, N1, N2):
         transform.append(gkj_hat)
     return np.array(transform)
 
+# def weight_j(patch_ind, look_up_table, patches, tau, N1, N2):
+#     """Computes the weight defined in the article for a given gkj_tilde"""
+#     gkj_tilde = building_gkj_array(patch_ind, look_up_table, patches, N1, N2)
+#     n, p = gkj_tilde.shape[0], gkj_tilde.shape[1]
+#     summing = 0
+#     wkj = []
+#     for i in range(n):
+#         for j in range(p):
+#             coeffs0 = pywt.wavedec(gkj_tilde[i,j,:,0], 'haar', level=2)
+#             coeffs1 = pywt.wavedec(gkj_tilde[i,j,:,1], 'haar', level=2)
+#             coeffs2 = pywt.wavedec(gkj_tilde[i,j,:,2], 'haar', level=2)
+#             for i in range(len(coeffs0)):
+#                 summing0 = np.linalg.norm(coeffs0[i])**2
+#                 summing1 = np.linalg.norm(coeffs1[i])**2
+#                 summing2 = np.linalg.norm(coeffs2[i])**2
+#     wkj += [(summing0/(summing0+tau**2))**(-2)] + [(summing1/(summing1+tau**2))**(-2)] + [(summing2/(summing2+tau**2))**(-2)]
+#     return wkj
+
 def weight_j(patch_ind, look_up_table, patches, tau, N1, N2):
     """Computes the weight defined in the article for a given gkj_tilde"""
     gkj_tilde = building_gkj_array(patch_ind, look_up_table, patches, N1, N2)
     n, p = gkj_tilde.shape[0], gkj_tilde.shape[1]
     summing = 0
-    wkj = []
     for i in range(n):
         for j in range(p):
-            coeffs0 = pywt.wavedec(gkj_tilde[i,j,:,0], 'haar', level=2)
-            coeffs1 = pywt.wavedec(gkj_tilde[i,j,:,1], 'haar', level=2)
-            coeffs2 = pywt.wavedec(gkj_tilde[i,j,:,2], 'haar', level=2)
-            for i in range(len(coeffs0)):
-                summing0 = np.linalg.norm(coeffs0[i])**2
-                summing1 = np.linalg.norm(coeffs1[i])**2
-                summing2 = np.linalg.norm(coeffs2[i])**2
-    wkj += [(summing0/(summing0+tau**2))**(-2)] + [(summing1/(summing1+tau**2))**(-2)] + [(summing2/(summing2+tau**2))**(-2)]
-    return wkj
+            coeffs = pywt.wavedec(gkj_tilde[i,j,:], 'haar', level=1)
+            for i in range(len(coeffs)):
+                summing = np.linalg.norm(coeffs[i])**2
+    wkj = summing/(summing+tau**2)
+    return wkj**(-2)
 
 def all_weights(look_up_table, patches, tau, N1, N2):
     """Computes all weights"""
@@ -81,19 +95,35 @@ def inverse_look_up_table(patches, look_up_table):
                     inv['patch '+str(i)] = [(num,np.where(look_up_table[patch] == i)[0][0])]
     return inv
 
+# def new_patches(look_up_table, inv, patches, tau, N1, N2):
+#     """Computes the new patches using the found weights and gkj_hats"""
+#     weights = all_weights(look_up_table, patches, tau, N1, N2)
+#     all_transforms = transform_over_all_img(look_up_table,patches,tau, N1, N2)
+#     new_patches = []
+#     for patch in inv:
+#         summing = np.zeros((N1,N1,3))
+#         normalization = np.zeros((1,3))
+#         for pat in inv[patch]:
+#             (ind_patch, position) = pat
+#             new_patch = all_transforms[ind_patch,:,:,position]
+#             summing += weights[ind_patch]*new_patch
+#             normalization += np.array([weights[ind_patch][0], weights[ind_patch][1], weights[ind_patch][2]])
+#         new_patches.append(summing / normalization)
+#     return np.array(new_patches)
+
 def new_patches(look_up_table, inv, patches, tau, N1, N2):
     """Computes the new patches using the found weights and gkj_hats"""
     weights = all_weights(look_up_table, patches, tau, N1, N2)
     all_transforms = transform_over_all_img(look_up_table,patches,tau, N1, N2)
     new_patches = []
     for patch in inv:
-        summing = np.zeros((N1,N1,3))
-        normalization = np.zeros((1,3))
+        summing = np.zeros((N1,N1, 3))
+        normalization = 0
         for pat in inv[patch]:
             (ind_patch, position) = pat
             new_patch = all_transforms[ind_patch,:,:,position]
             summing += weights[ind_patch]*new_patch
-            normalization += np.array([weights[ind_patch][0], weights[ind_patch][1], weights[ind_patch][2]])
+            normalization += weights[ind_patch]
         new_patches.append(summing / normalization)
     return np.array(new_patches)
 
@@ -131,6 +161,9 @@ def NLF_3D(img, N1, tau, patches, look_up_table, inv, N2):
 
 if __name__ == '__main__':
     N1, tau, N2 = 10, 7.5, 32
+
+    img_path = 'FFDNET_IPOL/input.png'
+    img = plt.imread(img_path)
     
     noisy_img = plt.imread('FFDNET_IPOL/noisy.png')
     noisy_img = cv2.normalize(noisy_img, None, alpha = 0, beta = 255, norm_type = cv2.NORM_MINMAX, dtype = cv2.CV_32F)
@@ -139,8 +172,11 @@ if __name__ == '__main__':
     inv = inverse_look_up_table(patches, look_up_table)
     
     img_est = NLF_3D(noisy_img, N1, tau, patches, look_up_table, inv, N2)
+
+    psnr = PSNR(img, img_est/255, peak=1)
+    print(psnr)
     plt.imshow(img_est)
     plt.show()
-    print(img_est)
+
     plt.imshow(abs(img_est-noisy_img))
     plt.show()

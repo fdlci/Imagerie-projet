@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pywt
 import re
+from utilities.utils import PSNR
 from block_matching import block_matching
 
 def separating_rgb(patches):
@@ -159,6 +160,8 @@ def NLF(noisy_img, N1, tau, N2, patches, look_up_table, inv):
     return image_est
 
 if __name__ == '__main__':
+    img_path = 'FFDNET_IPOL/input.png'
+    img = plt.imread(img_path)
     N1, tau, N2 = 10, 7.5, 32
     
     noisy_img = plt.imread('FFDNET_IPOL/noisy.png')
@@ -166,5 +169,7 @@ if __name__ == '__main__':
     inv = inverse_look_up_table(patches, look_up_table)
     
     img_est = NLF(noisy_img, N1, tau, N2, patches, look_up_table, inv)
+
+    psnr = PSNR(img, img_est/255, peak=1)
     plt.imshow(img_est)
     plt.show()

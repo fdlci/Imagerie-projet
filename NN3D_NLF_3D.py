@@ -44,7 +44,7 @@ if __name__ == '__main__':
     img_path = 'FFDNET_IPOL/input.png'
     img = plt.imread(img_path)
     saved_model = "FFDNET_IPOL/models/net_rgb.pth"
-    sigma, K, N1, N2 = 50, 2, 10, 32
+    sigma, K, N1, N2 = 30, 2, 10, 32
     denoised_image = NN3D(img, sigma, K, saved_model, N1, N2)
 
     psnr = PSNR(img, denoised_image/255, peak=1)
