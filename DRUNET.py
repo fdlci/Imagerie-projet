@@ -68,7 +68,7 @@ def load_model(saved_model):
                       upsample_mode="convtranspose")
     state_dict = torch.load(saved_model)
     Denoiser.load_state_dict(state_dict)
-    Denoiser = Denoiser.cuda()
+    Denoiser = Denoiser.to(device)
     Denoiser.eval()
     return Denoiser
 

@@ -45,12 +45,12 @@ if __name__ == '__main__':
     img = plt.imread(img_path)
     img = prepare_image_shape(img)
     saved_model = "DRUNET_DPIR/drunet_color.pth"
-    sigma, K, N1, N2 = 75, 2, 10, 32
+    sigma, K, N1, N2 = 30, 2, 10, 32
     denoised_image = NN3D(img, sigma, K, saved_model, N1, N2)
 
     psnr = PSNR(prepare_image_shape(img), denoised_image/255, peak=1)
     print(psnr)
 
     plt.imshow(denoised_image)
+    plt.savefig('Images/NN3D_DRU_30.png')
     plt.show()
-    plt.savefig('NN3D_filter1D_75.png')

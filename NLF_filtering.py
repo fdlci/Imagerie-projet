@@ -65,7 +65,7 @@ def weight_j(patch_ind, look_up_table, patches, tau, N1, N2):
     summing = 0
     for i in range(n):
         for j in range(p):
-            coeffs = pywt.wavedec(gkj_tilde[i,j,:], 'haar', level=2)
+            coeffs = pywt.wavedec(gkj_tilde[i,j,:], 'haar', level=1)
             for i in range(len(coeffs)):
                 summing = np.linalg.norm(coeffs[i])**2
     wkj = summing/(summing+tau**2)

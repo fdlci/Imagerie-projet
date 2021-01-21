@@ -51,5 +51,5 @@ if __name__ == '__main__':
     print(psnr)
 
     plt.imshow(denoised_image)
-    plt.savefig('NN3D_filter1D_75.png')
+    plt.savefig('Images/NN3D_FFD_30.png')
     plt.show()
